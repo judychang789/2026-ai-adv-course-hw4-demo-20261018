@@ -403,19 +403,20 @@ server.js
 ├─ 2. 取得用戶購物車所有品項（JOIN products 取得即時價格與庫存）
 ├─ 3. 檢查購物車是否為空 → 400 CART_EMPTY
 ├─ 4. 檢查每個品項庫存是否充足 → 400 STOCK_INSUFFICIENT（列出所有不足商品名稱）
-├─ 5. 計算 subtotal = Σ(price × quantity)
-├─ 6. Shipping 模組計算 shippingFee 與 totalAmount = subtotal + shippingFee
-├─ 7. 生成 orderNo: ORD-YYYYMMDD-{5碼UUID}
+ ├─ 5. 計算原始 subtotal = Σ(price × quantity)
+ ├─ 6. 驗證優惠碼並計算 discount，優惠後小計為 subtotal - discount
+ ├─ 7. Shipping 模組依優惠後小計計算 shippingFee 與 totalAmount
+ ├─ 8. 生成 orderNo: ORD-YYYYMMDD-{5碼UUID}
 │
-└─ 8. 🔒 Transaction 開始
-     ├─ INSERT orders 記錄
+ └─ 9. 🔒 Transaction 開始
+      ├─ INSERT orders 記錄（含 coupon_code、discount）
      ├─ 對每個購物車品項：
      │   ├─ INSERT order_items（快照 product_name, product_price）
      │   └─ UPDATE products SET stock = stock - quantity
      └─ DELETE cart_items WHERE user_id = ?
      🔒 Transaction 結束
 │
-└─ 9. 回傳 201 + subtotal、shipping_fee、total_amount 與訂單詳情
+ └─ 10. 回傳 201 + subtotal、discount、shipping_fee、total_amount 與訂單詳情
 ```
 
 ## Shipping 模組

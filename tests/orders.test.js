@@ -129,6 +129,16 @@ describe('Orders API', () => {
     expect(Array.isArray(res.body.data.items)).toBe(true);
   });
 
+  it('should not expose another user\'s order detail', async () => {
+    const { token: otherUserToken } = await registerUser();
+    const res = await request(app)
+      .get(`/api/orders/${orderId}`)
+      .set('Authorization', `Bearer ${otherUserToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body).toMatchObject({ data: null, error: 'NOT_FOUND' });
+  });
+
   it('should return 404 for non-existent order', async () => {
     const res = await request(app)
       .get('/api/orders/non-existent-order-id')

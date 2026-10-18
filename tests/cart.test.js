@@ -98,7 +98,7 @@ describe('Cart API', () => {
   });
 
   it('should reject non-integer quantity', async () => {
-    for (const quantity of [1.9, '3abc', [5]]) {
+    for (const quantity of [0, -1, 1.9, Infinity, '3abc', [5]]) {
       const res = await request(app)
         .post('/api/cart')
         .set('X-Session-Id', sessionId)

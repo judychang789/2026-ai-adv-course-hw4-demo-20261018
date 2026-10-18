@@ -8,6 +8,7 @@ const {
   findOrderById,
   findOrderForUser,
   listOrdersForUser,
+  countOrdersForUser,
   getOrderItems,
   getOrderItemSummaries,
   getCheckoutItems,
@@ -224,6 +225,25 @@ router.post('/', (req, res) => {
  *     tags: [Orders]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, paid, failed]
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 50
+ *           default: 10
  *     responses:
  *       200:
  *         description: 成功
@@ -256,6 +276,17 @@ router.post('/', (req, res) => {
  *                             type: string
  *                           created_at:
  *                             type: string
+ *                     pagination:
+ *                       type: object
+ *                       properties:
+ *                         page:
+ *                           type: integer
+ *                         limit:
+ *                           type: integer
+ *                         total:
+ *                           type: integer
+ *                         totalPages:
+ *                           type: integer
  *                 error:
  *                   type: string
  *                   nullable: true
@@ -263,10 +294,48 @@ router.post('/', (req, res) => {
  *                   type: string
  */
 router.get('/', (req, res) => {
-  const orders = listOrdersForUser(req.user.userId);
+  const { status } = req.query;
+  const allowedStatuses = ['pending', 'paid', 'failed'];
+  if (status !== undefined && (typeof status !== 'string' || !allowedStatuses.includes(status))) {
+    return res.status(400).json({
+      data: null,
+      error: 'VALIDATION_ERROR',
+      message: 'status 必須為 pending、paid 或 failed'
+    });
+  }
+
+  function parsePositiveInteger(value, defaultValue, field) {
+    if (value === undefined) return { value: defaultValue };
+    if (typeof value !== 'string' || !/^[1-9]\d*$/.test(value)) {
+      return { error: `${field} 必須為正整數` };
+    }
+    return { value: Number(value) };
+  }
+
+  const parsedPage = parsePositiveInteger(req.query.page, 1, 'page');
+  const parsedLimit = parsePositiveInteger(req.query.limit, 10, 'limit');
+  if (parsedPage.error || parsedLimit.error) {
+    return res.status(400).json({
+      data: null,
+      error: 'VALIDATION_ERROR',
+      message: parsedPage.error || parsedLimit.error
+    });
+  }
+
+  const page = parsedPage.value;
+  const limit = Math.min(parsedLimit.value, 50);
+  const total = countOrdersForUser(req.user.userId, status);
+  const orders = listOrdersForUser(req.user.userId, {
+    status,
+    limit,
+    offset: (page - 1) * limit
+  });
 
   res.json({
-    data: { orders: orders.map(serializeOrder) },
+    data: {
+      orders: orders.map(serializeOrder),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+    },
     error: null,
     message: '成功'
   });

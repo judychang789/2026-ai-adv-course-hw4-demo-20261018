@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Changed
+- Issue #1：新增結帳優惠碼模組，支援 FLOWER100、SPRING10 與失效碼驗證；訂單記錄優惠碼與折扣，並以折扣後小計計算免運門檻
 - 抽出 `src/services/orderService.js`（訂單查詢、序列化與建單 transaction）與 `src/services/paymentService.js`（QueryTradeInfo 結果判斷與付款狀態更新）
 - 新增 `src/utils/validators.js` 統一路由輸入驗證；Shipping 模組改以規則表描述，單元測試改為 table-driven
 - `postman_collection.json` 不進版控（列入 `.gitignore`），需要時以 `npm run postman` 產生；路由變更後只需以 `npm run openapi` 同步 `openapi.json`。`docs/TESTING.md` 補上產生與匯入步驟

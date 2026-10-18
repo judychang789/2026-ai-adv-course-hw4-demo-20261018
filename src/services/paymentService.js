@@ -8,12 +8,16 @@ const TRADE_STATUS_PAID = '1';
  * Throws when a paid result does not belong to this order.
  */
 function isTradePaid(order, tradeInfo, config = ECPAY_CONFIG) {
-  if (tradeInfo.TradeStatus !== TRADE_STATUS_PAID) {
-    return false;
+  if (!tradeInfo || typeof tradeInfo.CheckMacValue !== 'string' || tradeInfo.CheckMacValue === '') {
+    throw new Error('QueryTradeInfo CheckMacValue missing');
   }
 
-  if (tradeInfo.CheckMacValue && !verifyCheckMacValue(tradeInfo, config.hashKey, config.hashIV)) {
+  if (!verifyCheckMacValue(tradeInfo, config.hashKey, config.hashIV)) {
     throw new Error('QueryTradeInfo CheckMacValue mismatch');
+  }
+
+  if (tradeInfo.TradeStatus !== TRADE_STATUS_PAID) {
+    return false;
   }
 
   if (tradeInfo.MerchantTradeNo !== order.merchant_trade_no) {

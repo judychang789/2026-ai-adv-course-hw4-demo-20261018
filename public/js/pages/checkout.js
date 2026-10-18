@@ -54,7 +54,15 @@ createApp({
           body: JSON.stringify(form.value)
         });
         Notification.show('訂單已建立，正在前往付款...', 'success');
-        window.location.href = '/ecpay/payment/' + res.data.id;
+        const paymentResponse = await fetch('/ecpay/payment/' + res.data.id, {
+          headers: Auth.getAuthHeaders()
+        });
+        if (!paymentResponse.ok) {
+          throw new Error('付款頁面載入失敗');
+        }
+        document.open();
+        document.write(await paymentResponse.text());
+        document.close();
       } catch (err) {
         Notification.show(err?.data?.message || '訂單建立失敗', 'error');
       } finally {

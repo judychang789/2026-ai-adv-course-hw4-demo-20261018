@@ -140,6 +140,8 @@ describe('Order checkout integration flow', () => {
     expect(checkoutScript.type).toMatch(/javascript/);
     expect(checkoutScript.text).toContain("apiFetch('/api/orders'");
     expect(checkoutScript.text).toContain('shippingMethod');
+    expect(checkoutScript.text).toContain("fetch('/ecpay/payment/'");
+    expect(checkoutScript.text).toContain('Auth.getAuthHeaders()');
   });
 
   it('creates a member, cart, shipping order and persists every expected state change', async () => {
@@ -315,7 +317,14 @@ describe('Order checkout integration flow', () => {
 
   it('builds a valid ECPay staging form with the persisted order total', async () => {
     const { order } = await createPendingOrder(primaryProduct, 'ecpay-form@example.com');
-    const response = await request(app).get(`/ecpay/payment/${order.id}`);
+    const { token } = await createPendingOrder(primaryProduct, 'ecpay-form-owner@example.com');
+    const ownedOrder = await request(app)
+      .get('/api/orders')
+      .set('Authorization', `Bearer ${token}`);
+    const ownedOrderId = ownedOrder.body.data.orders[0].id;
+    const response = await request(app)
+      .get(`/ecpay/payment/${ownedOrderId}`)
+      .set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(200);
     expect(response.type).toBe('text/html');
@@ -324,11 +333,11 @@ describe('Order checkout integration flow', () => {
     const params = parseHiddenInputs(response.text);
     expect(params).toMatchObject({
       MerchantID: ECPAY_CONFIG.merchantId,
-      MerchantTradeNo: order.order_no.replace(/-/g, ''),
+      MerchantTradeNo: ownedOrder.body.data.orders[0].order_no.replace(/-/g, ''),
       TotalAmount: '1910',
       ItemName: `${primaryProduct.name} x2`,
       ReturnURL: 'http://localhost:3001/ecpay/notify',
-      ClientBackURL: `http://localhost:3001/orders/${order.id}?payment=pending`,
+      ClientBackURL: `http://localhost:3001/orders/${ownedOrderId}?payment=pending`,
       ChoosePayment: 'ALL',
       EncryptType: '1'
     });
@@ -380,12 +389,33 @@ describe('Order checkout integration flow', () => {
     )).toBe(true);
   });
 
+  it('rejects unauthenticated and cross-user payment form access', async () => {
+    const { order, user } = await createPendingOrder(primaryProduct, 'payment-owner@example.com');
+    const other = await registerMember('payment-other@example.com');
+
+    const unauthenticated = await request(app).get(`/ecpay/payment/${order.id}`);
+    expect(unauthenticated.status).toBe(401);
+
+    const crossUser = await request(app)
+      .get(`/ecpay/payment/${order.id}`)
+      .set('Authorization', `Bearer ${other.token}`);
+    expect(crossUser.status).toBe(404);
+    expect(crossUser.text).toContain('訂單不存在');
+    expect(user.id).not.toBe(other.user.id);
+  });
+
   it('keeps the order pending when mocked ECPay reports unpaid', async () => {
     const { token, order } = await createPendingOrder(primaryProduct, 'ecpay-pending@example.com');
+    const tradeInfo = {
+      MerchantID: ECPAY_CONFIG.merchantId,
+      MerchantTradeNo: order.order_no.replace(/-/g, ''),
+      TradeAmt: String(order.total_amount),
+      TradeStatus: '0'
+    };
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      text: async () => `MerchantID=${ECPAY_CONFIG.merchantId}&TradeStatus=0&RtnCode=0`
+      text: async () => signedTradeInfo(tradeInfo)
     }));
 
     const response = await request(app)
@@ -395,6 +425,53 @@ describe('Order checkout integration flow', () => {
     expectEnvelope(response, 200);
     expect(response.body.data.status).toBe('pending');
     expect(response.body.data.ecpay_trade_status).toBe('0');
+    expect(db.prepare('SELECT status FROM orders WHERE id = ?').get(order.id).status).toBe('pending');
+  });
+
+  it('rejects a paid response without CheckMacValue', async () => {
+    const { token, order } = await createPendingOrder(primaryProduct, 'ecpay-missing-mac@example.com');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => new URLSearchParams({
+        MerchantID: ECPAY_CONFIG.merchantId,
+        MerchantTradeNo: order.order_no.replace(/-/g, ''),
+        TradeAmt: String(order.total_amount),
+        TradeStatus: '1'
+      }).toString()
+    }));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const response = await request(app)
+      .post(`/api/orders/${order.id}/check-payment`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expectEnvelope(response, 500);
+    expect(response.body.error).toBe('ECPAY_QUERY_ERROR');
+    expect(db.prepare('SELECT status FROM orders WHERE id = ?').get(order.id).status).toBe('pending');
+  });
+
+  it('rejects an unpaid response with an invalid CheckMacValue', async () => {
+    const { token, order } = await createPendingOrder(primaryProduct, 'ecpay-invalid-unpaid-mac@example.com');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => new URLSearchParams({
+        MerchantID: ECPAY_CONFIG.merchantId,
+        MerchantTradeNo: order.order_no.replace(/-/g, ''),
+        TradeAmt: String(order.total_amount),
+        TradeStatus: '0',
+        CheckMacValue: '0'.repeat(64)
+      }).toString()
+    }));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const response = await request(app)
+      .post(`/api/orders/${order.id}/check-payment`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expectEnvelope(response, 500);
+    expect(response.body.error).toBe('ECPAY_QUERY_ERROR');
     expect(db.prepare('SELECT status FROM orders WHERE id = ?').get(order.id).status).toBe('pending');
   });
 

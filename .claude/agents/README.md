@@ -1,6 +1,6 @@
 # SubAgent 小隊
 
-本專案的 SubAgent 角色依照 `docs/image/建立 SubAgent 小隊.webp` 建立：
+本專案的 SubAgent 角色：
 
 - `security-reviewer.md`：檢查權限、身分驗證、金流與輸入驗證。
 - `code-reviewer.md`：檢查業務邏輯、邊界條件、規格符合度與測試覆蓋。

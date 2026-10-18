@@ -1,6 +1,7 @@
 const express = require('express');
 const { buildAioFormHtml } = require('../utils/ecpay');
-const { findOrderById, getOrderItemSummaries } = require('../services/orderService');
+const authMiddleware = require('../middleware/authMiddleware');
+const { findOrderForUser, getOrderItemSummaries } = require('../services/orderService');
 const router = express.Router();
 
 // Helper to render with front layout
@@ -58,8 +59,8 @@ router.get('/orders/:id', function (req, res) {
 });
 
 // ECPay payment form page
-router.get('/ecpay/payment/:orderId', function (req, res) {
-  const order = findOrderById(req.params.orderId);
+router.get('/ecpay/payment/:orderId', authMiddleware, function (req, res) {
+  const order = findOrderForUser(req.params.orderId, req.user.userId);
   if (!order) {
     return res.status(404).send('訂單不存在');
   }

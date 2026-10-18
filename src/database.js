@@ -62,6 +62,8 @@ function initializeDatabase() {
       shipping_method TEXT NOT NULL DEFAULT 'home_delivery',
       is_remote_area INTEGER NOT NULL DEFAULT 0,
       is_express INTEGER NOT NULL DEFAULT 0,
+      coupon_code TEXT,
+      discount INTEGER NOT NULL DEFAULT 0,
       total_amount INTEGER NOT NULL,
       status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'paid', 'failed')),
 
@@ -100,6 +102,16 @@ function initializeDatabase() {
   ];
 
   for (const [column, definition] of shippingColumns) {
+    if (!orderColumns.has(column)) {
+      db.exec(`ALTER TABLE orders ADD COLUMN ${column} ${definition}`);
+    }
+  }
+
+  const couponColumns = [
+    ['coupon_code', 'TEXT'],
+    ['discount', 'INTEGER NOT NULL DEFAULT 0']
+  ];
+  for (const [column, definition] of couponColumns) {
     if (!orderColumns.has(column)) {
       db.exec(`ALTER TABLE orders ADD COLUMN ${column} ${definition}`);
     }

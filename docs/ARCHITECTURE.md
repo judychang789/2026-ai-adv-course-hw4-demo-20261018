@@ -35,6 +35,7 @@
 │   ├── utils/
 │   │   ├── ecpay.js                # 綠界 ECPay 工具：CheckMacValue 簽章、URL 編碼、AIO 表單產生、QueryTradeInfo 查詢
 │   │   ├── shipping.js             # 配送費用純邏輯：基本運費、免運門檻、偏遠/急件附加費
+│   │   ├── coupon.js               # 優惠碼規則與折扣計算
 │   │   └── validators.js           # 共用輸入驗證：非空字串、選填字串、正整數
 │   ├── services/
 │   │   ├── orderService.js         # 訂單查詢、序列化、訂單編號與建單 transaction（依賴資料庫）
@@ -368,12 +369,14 @@ server.js
 | recipient_name | TEXT | NOT NULL | 收件人姓名 |
 | recipient_email | TEXT | NOT NULL | 收件人 Email |
 | recipient_address | TEXT | NOT NULL | 收件地址 |
-| subtotal | INTEGER | NOT NULL | 下單時商品小計快照 |
+| subtotal | INTEGER | NOT NULL | 下單時商品小計快照（折扣前） |
+| coupon_code | TEXT | 可為 NULL | 使用的優惠碼（正規化為大寫） |
+| discount | INTEGER | NOT NULL DEFAULT 0 | 商品小計折扣金額 |
 | shipping_fee | INTEGER | NOT NULL DEFAULT 0 | 實收運費（基本運費 + 附加費） |
 | shipping_method | TEXT | NOT NULL DEFAULT 'home_delivery' | `home_delivery` 或 `convenience_store` |
 | is_remote_area | INTEGER | NOT NULL DEFAULT 0 | 偏遠地區快照（0/1） |
 | is_express | INTEGER | NOT NULL DEFAULT 0 | 當日急件快照（0/1） |
-| total_amount | INTEGER | NOT NULL | 訂單總金額（`subtotal + shipping_fee`） |
+| total_amount | INTEGER | NOT NULL | 訂單總金額（`subtotal - discount + shipping_fee`） |
 | status | TEXT | NOT NULL DEFAULT 'pending', CHECK IN ('pending','paid','failed') | 訂單狀態 |
 | merchant_trade_no | TEXT | 可為 NULL | 綠界交易編號（由 order_no 去除連字號產生，如 `ORD20260412A1B2C`） |
 | created_at | TEXT | NOT NULL DEFAULT datetime('now') | 建立時間 |

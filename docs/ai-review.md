@@ -117,13 +117,15 @@
 
 本節只補充本輪已完成的審查與測試證據；本輪沒有修改產品程式、測試、SubAgent 定義或設定檔，也沒有 commit 或 push。既有章節中的原始審查紀錄保留不變。
 
+> 後續設定校正（2026-10-31）：本報告與 `.claude/agents/` 已更新，以反映實際目錄結構及 Codex／Claude Code 的設定邊界；這不是第二輪審查當日的產品程式或測試變更。
+
 ### SubAgent 分工與實際結論
 
-專案目前實際存在的是 `.agents/` 下的三份定義；沒有 `.claude/agents/` 目錄。角色定義位於：
+本次審查使用的三份角色定義實際位於 `.claude/agents/`，而 `.agents/` 目錄目前沒有角色定義。這些檔案是 Claude Code 相容的 agent definitions，已使用 YAML frontmatter 宣告名稱、說明與可用工具；它們不是 Codex CLI 自動載入的子代理或工具權限設定。Codex 的持久專案規範由根目錄 `AGENTS.md` 載入，角色分工在本報告中應視為審查流程與責任劃分，而非由 Codex 強制執行的沙箱。角色定義位於：
 
-- `security-reviewer`（`.agents/security-reviewer.md`）：檢查權限、身分驗證、輸入驗證、敏感資料、注入、Session/JWT 與金流。只讀工具，不修改檔案。實際結論：確認付款表單路由缺少擁有者驗證；確認 paid QueryTradeInfo 可缺少 `CheckMacValue`；確認非 paid 回應也未驗證簽章。
-- `code-reviewer`（`.agents/code-reviewer.md`）：檢查業務邏輯、邊界條件、規格符合度與測試是否被跳過或弱化。只讀工具，不修改檔案。實際結論：確認付款表單的授權邊界缺口；確認付款簽章驗證只覆蓋部分分支；指出既有 pending 測試使用未簽章回應，未能證明完整性規則。
-- `test-runner`（`.agents/test-runner.md`）：執行指定測試，只回報失敗項目、位置與可能原因；不可 Edit/Write。實際結論：兩組指定測試均通過，但既有測試未涵蓋本輪三個付款安全負向案例；另以獨立記憶體 SQLite HTTP 驗證確認付款表單未授權請求回傳 200。
+- `security-reviewer`（`.claude/agents/security-reviewer.md`）：檢查權限、身分驗證、輸入驗證、敏感資料、注入、Session/JWT 與金流。Claude Code 設定為只讀工具，不修改檔案。實際結論：確認付款表單路由缺少擁有者驗證；確認 paid QueryTradeInfo 可缺少 `CheckMacValue`；確認非 paid 回應也未驗證簽章。
+- `code-reviewer`（`.claude/agents/code-reviewer.md`）：檢查業務邏輯、邊界條件、規格符合度與測試是否被跳過或弱化。Claude Code 設定為只讀工具，不修改檔案。實際結論：確認付款表單的授權邊界缺口；確認付款簽章驗證只覆蓋部分分支；指出既有 pending 測試使用未簽章回應，未能證明完整性規則。
+- `test-runner`（`.claude/agents/test-runner.md`）：執行指定測試，只回報失敗項目、位置與可能原因；Claude Code 設定可讀取檔案並執行測試、不可 Edit/Write。實際結論：兩組指定測試均通過，但既有測試未涵蓋本輪三個付款安全負向案例；另以獨立記憶體 SQLite HTTP 驗證確認付款表單未授權請求回傳 200。
 
 ### 已確認問題總表
 

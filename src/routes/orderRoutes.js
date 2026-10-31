@@ -12,6 +12,7 @@ const {
   getOrderItemSummaries,
   getCheckoutItems,
   findInsufficientItems,
+  cancelPendingOrderForUser,
   createOrderFromCart
 } = require('../services/orderService');
 const { isTradePaid, markOrderPaid } = require('../services/paymentService');
@@ -390,6 +391,50 @@ router.get('/:id', (req, res) => {
     data: { ...serializeOrder(order), items },
     error: null,
     message: '成功'
+  });
+});
+
+/**
+ * @openapi
+ * /api/orders/{id}/cancel:
+ *   post:
+ *     summary: 取消自己的未付款訂單並回補庫存
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 訂單取消成功，庫存已回補
+ *       404:
+ *         description: 訂單不存在或不屬於目前會員
+ *       409:
+ *         description: 訂單已非 pending，無法取消
+ */
+router.post('/:id/cancel', (req, res) => {
+  const order = findOrderForUser(req.params.id, req.user.userId);
+  if (!order) {
+    return res.status(404).json({ data: null, error: 'NOT_FOUND', message: '訂單不存在' });
+  }
+
+  if (order.status !== 'pending') {
+    return res.status(409).json({ data: null, error: 'INVALID_STATUS', message: '只有未付款訂單可以取消' });
+  }
+
+  const cancelledOrder = cancelPendingOrderForUser(order.id, req.user.userId);
+  if (!cancelledOrder) {
+    return res.status(409).json({ data: null, error: 'INVALID_STATUS', message: '訂單狀態已變更，無法取消' });
+  }
+
+  res.json({
+    data: serializeOrder(cancelledOrder),
+    error: null,
+    message: '訂單已取消，庫存已回補'
   });
 });
 

@@ -31,7 +31,7 @@ router.use(authMiddleware, adminMiddleware);
  *         name: status
  *         schema:
  *           type: string
- *           enum: [pending, paid, failed]
+ *           enum: [pending, paid, failed, cancelled]
  *     responses:
  *       200:
  *         description: 成功
@@ -97,7 +97,7 @@ router.get('/', (req, res) => {
   let querySql = 'SELECT * FROM orders';
   const params = [];
 
-  if (status && ['pending', 'paid', 'failed'].includes(status)) {
+  if (status && ['pending', 'paid', 'failed', 'cancelled'].includes(status)) {
     countSql += ' WHERE status = ?';
     querySql += ' WHERE status = ?';
     params.push(status);

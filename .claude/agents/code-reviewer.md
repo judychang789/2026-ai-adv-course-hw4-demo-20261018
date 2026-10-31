@@ -1,3 +1,9 @@
+---
+name: code-reviewer
+description: 審查業務邏輯、邊界條件、規格符合度與測試覆蓋。
+tools: Read, Grep, Glob
+---
+
 # code-reviewer
 
 ## 職責

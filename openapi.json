@@ -25,6 +25,926 @@
     }
   },
   "paths": {
+    "/api/admin/products": {
+      "get": {
+        "summary": "後台商品列表",
+        "tags": [
+          "Admin Products"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "price": {
+                                "type": "integer"
+                              },
+                              "stock": {
+                                "type": "integer"
+                              },
+                              "image_url": {
+                                "type": "string"
+                              },
+                              "created_at": {
+                                "type": "string"
+                              },
+                              "updated_at": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer"
+                            },
+                            "page": {
+                              "type": "integer"
+                            },
+                            "limit": {
+                              "type": "integer"
+                            },
+                            "totalPages": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未登入"
+          },
+          "403": {
+            "description": "權限不足"
+          }
+        }
+      },
+      "post": {
+        "summary": "新增商品",
+        "tags": [
+          "Admin Products"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "price",
+                  "stock"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "stock": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "image_url": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "商品新增成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "price": {
+                          "type": "integer"
+                        },
+                        "stock": {
+                          "type": "integer"
+                        },
+                        "image_url": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "參數錯誤"
+          }
+        }
+      }
+    },
+    "/api/admin/products/{id}": {
+      "put": {
+        "summary": "編輯商品",
+        "tags": [
+          "Admin Products"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "stock": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "image_url": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "商品更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "price": {
+                          "type": "integer"
+                        },
+                        "stock": {
+                          "type": "integer"
+                        },
+                        "image_url": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "updated_at": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "商品不存在"
+          }
+        }
+      },
+      "delete": {
+        "summary": "刪除商品",
+        "tags": [
+          "Admin Products"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "商品刪除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "商品不存在"
+          },
+          "409": {
+            "description": "商品存在未完成訂單，無法刪除"
+          }
+        }
+      }
+    },
+    "/api/admin/orders": {
+      "get": {
+        "summary": "後台訂單列表",
+        "tags": [
+          "Admin Orders"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "paid",
+                "failed",
+                "cancelled"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "orders": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "order_no": {
+                                "type": "string"
+                              },
+                              "user_id": {
+                                "type": "string"
+                              },
+                              "recipient_name": {
+                                "type": "string"
+                              },
+                              "recipient_email": {
+                                "type": "string"
+                              },
+                              "subtotal": {
+                                "type": "integer"
+                              },
+                              "shipping_fee": {
+                                "type": "integer"
+                              },
+                              "shipping_method": {
+                                "type": "string"
+                              },
+                              "total_amount": {
+                                "type": "integer"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "created_at": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer"
+                            },
+                            "page": {
+                              "type": "integer"
+                            },
+                            "limit": {
+                              "type": "integer"
+                            },
+                            "totalPages": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/orders/{id}": {
+      "get": {
+        "summary": "後台訂單詳情",
+        "tags": [
+          "Admin Orders"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "order_no": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "string"
+                        },
+                        "recipient_name": {
+                          "type": "string"
+                        },
+                        "recipient_email": {
+                          "type": "string"
+                        },
+                        "recipient_address": {
+                          "type": "string"
+                        },
+                        "subtotal": {
+                          "type": "integer"
+                        },
+                        "shipping_fee": {
+                          "type": "integer"
+                        },
+                        "shipping_method": {
+                          "type": "string",
+                          "enum": [
+                            "home_delivery",
+                            "convenience_store"
+                          ]
+                        },
+                        "is_remote_area": {
+                          "type": "boolean"
+                        },
+                        "is_express": {
+                          "type": "boolean"
+                        },
+                        "total_amount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "created_at": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "product_id": {
+                                "type": "string"
+                              },
+                              "product_name": {
+                                "type": "string"
+                              },
+                              "product_price": {
+                                "type": "integer"
+                              },
+                              "quantity": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "email": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "訂單不存在"
+          }
+        }
+      }
+    },
+    "/api/cart": {
+      "get": {
+        "summary": "查看購物車",
+        "tags": [
+          "Cart"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionId": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "product_id": {
+                                "type": "string"
+                              },
+                              "quantity": {
+                                "type": "integer"
+                              },
+                              "product": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "price": {
+                                    "type": "integer"
+                                  },
+                                  "stock": {
+                                    "type": "integer"
+                                  },
+                                  "image_url": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "加入商品到購物車",
+        "tags": [
+          "Cart"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionId": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "productId"
+                ],
+                "properties": {
+                  "productId": {
+                    "type": "string"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "已加入購物車",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "product_id": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "參數缺失或庫存不足"
+          },
+          "404": {
+            "description": "商品不存在"
+          }
+        }
+      }
+    },
+    "/api/cart/{itemId}": {
+      "patch": {
+        "summary": "修改購物車商品數量",
+        "tags": [
+          "Cart"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionId": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "quantity"
+                ],
+                "properties": {
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "數量已更新",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "product_id": {
+                          "type": "string"
+                        },
+                        "quantity": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "庫存不足"
+          },
+          "404": {
+            "description": "購物車項目不存在"
+          }
+        }
+      },
+      "delete": {
+        "summary": "移除購物車項目",
+        "tags": [
+          "Cart"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "sessionId": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "itemId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "已從購物車移除",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "購物車項目不存在"
+          }
+        }
+      }
+    },
     "/api/products": {
       "get": {
         "summary": "取得商品列表",
@@ -538,6 +1458,40 @@
         }
       }
     },
+    "/api/orders/{id}/cancel": {
+      "post": {
+        "summary": "取消自己的未付款訂單並回補庫存",
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "訂單取消成功，庫存已回補"
+          },
+          "404": {
+            "description": "訂單不存在或不屬於目前會員"
+          },
+          "409": {
+            "description": "訂單已非 pending，無法取消"
+          }
+        }
+      }
+    },
     "/api/orders/{id}/pay": {
       "patch": {
         "summary": "模擬付款（僅 NODE_ENV=test 開放，其他環境回 404）",
@@ -680,300 +1634,6 @@
           },
           "500": {
             "description": "綠界查詢失敗，或回應的 CheckMacValue、交易編號、金額驗證不符（ECPAY_QUERY_ERROR）"
-          }
-        }
-      }
-    },
-    "/api/cart": {
-      "get": {
-        "summary": "查看購物車",
-        "tags": [
-          "Cart"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "sessionId": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "items": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "product_id": {
-                                "type": "string"
-                              },
-                              "quantity": {
-                                "type": "integer"
-                              },
-                              "product": {
-                                "type": "object",
-                                "properties": {
-                                  "name": {
-                                    "type": "string"
-                                  },
-                                  "price": {
-                                    "type": "integer"
-                                  },
-                                  "stock": {
-                                    "type": "integer"
-                                  },
-                                  "image_url": {
-                                    "type": "string"
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "total": {
-                          "type": "integer"
-                        }
-                      }
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "加入商品到購物車",
-        "tags": [
-          "Cart"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "sessionId": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "productId"
-                ],
-                "properties": {
-                  "productId": {
-                    "type": "string"
-                  },
-                  "quantity": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "default": 1
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "已加入購物車",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "product_id": {
-                          "type": "string"
-                        },
-                        "quantity": {
-                          "type": "integer"
-                        }
-                      }
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "參數缺失或庫存不足"
-          },
-          "404": {
-            "description": "商品不存在"
-          }
-        }
-      }
-    },
-    "/api/cart/{itemId}": {
-      "patch": {
-        "summary": "修改購物車商品數量",
-        "tags": [
-          "Cart"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "sessionId": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "itemId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "quantity"
-                ],
-                "properties": {
-                  "quantity": {
-                    "type": "integer",
-                    "minimum": 1
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "數量已更新",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "product_id": {
-                          "type": "string"
-                        },
-                        "quantity": {
-                          "type": "integer"
-                        }
-                      }
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "庫存不足"
-          },
-          "404": {
-            "description": "購物車項目不存在"
-          }
-        }
-      },
-      "delete": {
-        "summary": "移除購物車項目",
-        "tags": [
-          "Cart"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          },
-          {
-            "sessionId": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "itemId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "已從購物車移除",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "nullable": true
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "購物車項目不存在"
           }
         }
       }
@@ -1202,631 +1862,6 @@
           },
           "401": {
             "description": "未登入或 token 無效"
-          }
-        }
-      }
-    },
-    "/api/admin/products": {
-      "get": {
-        "summary": "後台商品列表",
-        "tags": [
-          "Admin Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "products": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "name": {
-                                "type": "string"
-                              },
-                              "description": {
-                                "type": "string"
-                              },
-                              "price": {
-                                "type": "integer"
-                              },
-                              "stock": {
-                                "type": "integer"
-                              },
-                              "image_url": {
-                                "type": "string"
-                              },
-                              "created_at": {
-                                "type": "string"
-                              },
-                              "updated_at": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        },
-                        "pagination": {
-                          "type": "object",
-                          "properties": {
-                            "total": {
-                              "type": "integer"
-                            },
-                            "page": {
-                              "type": "integer"
-                            },
-                            "limit": {
-                              "type": "integer"
-                            },
-                            "totalPages": {
-                              "type": "integer"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "未登入"
-          },
-          "403": {
-            "description": "權限不足"
-          }
-        }
-      },
-      "post": {
-        "summary": "新增商品",
-        "tags": [
-          "Admin Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "price",
-                  "stock"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  },
-                  "price": {
-                    "type": "integer",
-                    "minimum": 1
-                  },
-                  "stock": {
-                    "type": "integer",
-                    "minimum": 0
-                  },
-                  "image_url": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "商品新增成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": "string"
-                        },
-                        "price": {
-                          "type": "integer"
-                        },
-                        "stock": {
-                          "type": "integer"
-                        },
-                        "image_url": {
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        },
-                        "updated_at": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "參數錯誤"
-          }
-        }
-      }
-    },
-    "/api/admin/products/{id}": {
-      "put": {
-        "summary": "編輯商品",
-        "tags": [
-          "Admin Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  },
-                  "price": {
-                    "type": "integer",
-                    "minimum": 1
-                  },
-                  "stock": {
-                    "type": "integer",
-                    "minimum": 0
-                  },
-                  "image_url": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "商品更新成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": "string"
-                        },
-                        "price": {
-                          "type": "integer"
-                        },
-                        "stock": {
-                          "type": "integer"
-                        },
-                        "image_url": {
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        },
-                        "updated_at": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "商品不存在"
-          }
-        }
-      },
-      "delete": {
-        "summary": "刪除商品",
-        "tags": [
-          "Admin Products"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "商品刪除成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "nullable": true
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "商品不存在"
-          },
-          "409": {
-            "description": "商品存在未完成訂單，無法刪除"
-          }
-        }
-      }
-    },
-    "/api/admin/orders": {
-      "get": {
-        "summary": "後台訂單列表",
-        "tags": [
-          "Admin Orders"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "query",
-            "name": "page",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "schema": {
-              "type": "integer",
-              "default": 10
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "pending",
-                "paid",
-                "failed"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "orders": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "order_no": {
-                                "type": "string"
-                              },
-                              "user_id": {
-                                "type": "string"
-                              },
-                              "recipient_name": {
-                                "type": "string"
-                              },
-                              "recipient_email": {
-                                "type": "string"
-                              },
-                              "subtotal": {
-                                "type": "integer"
-                              },
-                              "shipping_fee": {
-                                "type": "integer"
-                              },
-                              "shipping_method": {
-                                "type": "string"
-                              },
-                              "total_amount": {
-                                "type": "integer"
-                              },
-                              "status": {
-                                "type": "string"
-                              },
-                              "created_at": {
-                                "type": "string"
-                              }
-                            }
-                          }
-                        },
-                        "pagination": {
-                          "type": "object",
-                          "properties": {
-                            "total": {
-                              "type": "integer"
-                            },
-                            "page": {
-                              "type": "integer"
-                            },
-                            "limit": {
-                              "type": "integer"
-                            },
-                            "totalPages": {
-                              "type": "integer"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/admin/orders/{id}": {
-      "get": {
-        "summary": "後台訂單詳情",
-        "tags": [
-          "Admin Orders"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "order_no": {
-                          "type": "string"
-                        },
-                        "user_id": {
-                          "type": "string"
-                        },
-                        "recipient_name": {
-                          "type": "string"
-                        },
-                        "recipient_email": {
-                          "type": "string"
-                        },
-                        "recipient_address": {
-                          "type": "string"
-                        },
-                        "subtotal": {
-                          "type": "integer"
-                        },
-                        "shipping_fee": {
-                          "type": "integer"
-                        },
-                        "shipping_method": {
-                          "type": "string",
-                          "enum": [
-                            "home_delivery",
-                            "convenience_store"
-                          ]
-                        },
-                        "is_remote_area": {
-                          "type": "boolean"
-                        },
-                        "is_express": {
-                          "type": "boolean"
-                        },
-                        "total_amount": {
-                          "type": "integer"
-                        },
-                        "status": {
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        },
-                        "items": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string"
-                              },
-                              "product_id": {
-                                "type": "string"
-                              },
-                              "product_name": {
-                                "type": "string"
-                              },
-                              "product_price": {
-                                "type": "integer"
-                              },
-                              "quantity": {
-                                "type": "integer"
-                              }
-                            }
-                          }
-                        },
-                        "user": {
-                          "type": "object",
-                          "properties": {
-                            "name": {
-                              "type": "string"
-                            },
-                            "email": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "error": {
-                      "type": "string",
-                      "nullable": true
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "訂單不存在"
           }
         }
       }

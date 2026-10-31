@@ -1,4 +1,8 @@
-# SubAgent 小隊
+# Claude Code SubAgent 小隊
+
+本目錄使用 Claude Code agent definition 格式。每份角色檔頂端的 YAML frontmatter 用於支援此格式的工具設定名稱、說明、模型與可用工具。
+
+Codex 不會自動將此目錄註冊為子代理，也不會由這些檔案強制工具權限；Codex 的持久專案規範以根目錄 `AGENTS.md` 為準。需要在 Codex 重用流程時，應建立 `.agents/skills/<skill-name>/SKILL.md`。
 
 本專案的 SubAgent 角色：
 

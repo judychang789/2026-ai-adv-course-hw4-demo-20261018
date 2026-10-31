@@ -1,3 +1,10 @@
+---
+name: test-runner
+description: 執行指定測試並只回報失敗項目、位置與可能原因。
+tools: Read, Grep, Glob, Bash
+model: haiku
+---
+
 # test-runner
 
 ## 職責

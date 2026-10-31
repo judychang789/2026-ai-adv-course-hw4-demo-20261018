@@ -65,7 +65,7 @@ function initializeDatabase() {
       coupon_code TEXT,
       discount INTEGER NOT NULL DEFAULT 0,
       total_amount INTEGER NOT NULL,
-      status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'paid', 'failed')),
+      status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'paid', 'failed', 'cancelled')),
 
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY (user_id) REFERENCES users(id)
@@ -114,6 +114,54 @@ function initializeDatabase() {
   for (const [column, definition] of couponColumns) {
     if (!orderColumns.has(column)) {
       db.exec(`ALTER TABLE orders ADD COLUMN ${column} ${definition}`);
+    }
+  }
+
+  // SQLite cannot alter a CHECK constraint in place. Rebuild legacy orders
+  // tables so pending orders can transition to cancelled when stock is restored.
+  const ordersTable = db.prepare(
+    "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'orders'"
+  ).get();
+  if (ordersTable && !ordersTable.sql.includes("'cancelled'")) {
+    db.pragma('foreign_keys = OFF');
+    try {
+      db.transaction(() => {
+        db.exec(`
+          CREATE TABLE orders_replacement (
+            id TEXT PRIMARY KEY,
+            order_no TEXT UNIQUE NOT NULL,
+            user_id TEXT NOT NULL,
+            recipient_name TEXT NOT NULL,
+            recipient_email TEXT NOT NULL,
+            recipient_address TEXT NOT NULL,
+            subtotal INTEGER NOT NULL,
+            shipping_fee INTEGER NOT NULL DEFAULT 0,
+            shipping_method TEXT NOT NULL DEFAULT 'home_delivery',
+            is_remote_area INTEGER NOT NULL DEFAULT 0,
+            is_express INTEGER NOT NULL DEFAULT 0,
+            coupon_code TEXT,
+            discount INTEGER NOT NULL DEFAULT 0,
+            total_amount INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'paid', 'failed', 'cancelled')),
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            merchant_trade_no TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+          );
+          INSERT INTO orders_replacement (
+            id, order_no, user_id, recipient_name, recipient_email, recipient_address,
+            subtotal, shipping_fee, shipping_method, is_remote_area, is_express,
+            coupon_code, discount, total_amount, status, created_at, merchant_trade_no
+          ) SELECT
+            id, order_no, user_id, recipient_name, recipient_email, recipient_address,
+            subtotal, shipping_fee, shipping_method, is_remote_area, is_express,
+            coupon_code, discount, total_amount, status, created_at, merchant_trade_no
+          FROM orders;
+          DROP TABLE orders;
+          ALTER TABLE orders_replacement RENAME TO orders;
+        `);
+      })();
+    } finally {
+      db.pragma('foreign_keys = ON');
     }
   }
 

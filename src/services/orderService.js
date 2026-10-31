@@ -81,6 +81,31 @@ function findInsufficientItems(cartItems) {
 }
 
 /**
+ * Cancel one of the member's pending orders and restore its item stock atomically.
+ * Returns null if the conditional pending -> cancelled transition did not occur.
+ */
+function cancelPendingOrderForUser(orderId, userId) {
+  const markCancelled = db.prepare(
+    "UPDATE orders SET status = 'cancelled' WHERE id = ? AND user_id = ? AND status = 'pending'"
+  );
+  const selectItems = db.prepare('SELECT product_id, quantity FROM order_items WHERE order_id = ?');
+  const restoreStock = db.prepare('UPDATE products SET stock = stock + ? WHERE id = ?');
+
+  return db.transaction(() => {
+    const transition = markCancelled.run(orderId, userId);
+    if (transition.changes !== 1) return null;
+
+    for (const item of selectItems.all(orderId)) {
+      if (restoreStock.run(item.quantity, item.product_id).changes !== 1) {
+        throw new Error(`無法回補商品庫存：${item.product_id}`);
+      }
+    }
+
+    return findOrderForUser(orderId, userId);
+  })();
+}
+
+/**
  * Create an order from the member's cart in one transaction:
  * insert order → snapshot items → deduct stock → clear cart.
  * Amounts must already be calculated by the caller.
@@ -145,5 +170,6 @@ module.exports = {
   getOrderItemSummaries,
   getCheckoutItems,
   findInsufficientItems,
+  cancelPendingOrderForUser,
   createOrderFromCart
 };

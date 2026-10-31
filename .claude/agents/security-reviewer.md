@@ -1,3 +1,9 @@
+---
+name: security-reviewer
+description: 審查權限、身分驗證、輸入驗證與付款流程安全性。
+tools: Read, Grep, Glob
+---
+
 # security-reviewer
 
 ## 職責

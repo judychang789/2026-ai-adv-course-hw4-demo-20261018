@@ -1,5 +1,11 @@
 # AGENTS.md
 
+## Codex 設定範圍
+
+- 本檔是 Codex 的 repository-level instructions；Codex 會自動載入它。
+- `.claude/agents/` 是 Claude Code 相容設定，並非 Codex 的子代理註冊或工具權限機制。其 YAML frontmatter 僅在支援該格式的工具中生效。
+- 若要為 Codex 建立可重用工作流程，使用 repo-local skill（`.agents/skills/<skill-name>/SKILL.md`）或在任務中明確提供指令；不可把 Markdown 內的「只讀」敘述視為 Codex 的強制工具沙箱。
+
 ## 專案概述
 花卉電商網站（backend-project） — Node.js + Express + SQLite + EJS + Tailwind CSS 全端電商平台
 
